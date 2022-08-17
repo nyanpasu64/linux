@@ -767,6 +767,8 @@ bool dcn_validate_bandwidth(
 		struct dc_state *context,
 		bool fast_validate)
 {
+	pr_warn("dcn_validate_bandwidth\n");
+
 	/*
 	 * we want a breakdown of the various stages of validation, which the
 	 * perf_trace macro doesn't support

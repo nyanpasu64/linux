@@ -39,6 +39,7 @@
 /*REVISION#250*/
 void scaler_settings_calculation(struct dcn_bw_internal_vars *v)
 {
+	pr_warn("scaler_settings_calculation\n");
 	int k;
 	for (k = 0; k <= v->number_of_active_planes - 1; k++) {
 		if (v->allow_different_hratio_vratio == dcn_bw_yes) {
