@@ -439,7 +439,7 @@ static void calculate_bandwidth(
 				data->v_taps[i] = bw_int_to_fixed(1);
 			}
 
-			pr_warn("asdf: [%d], v_scale_ratio = %llx, h_scale_ratio = %llx, surface_type = %d",
+			pr_warn("asdf: [%d], v_scale_ratio = %llx, h_scale_ratio = %llx, surface_type = %d\n",
 				i, data->v_scale_ratio[i].value, data->h_scale_ratio[i].value, surface_type[i]
 			);
 
@@ -462,7 +462,7 @@ static void calculate_bandwidth(
 				data->vsr_after_surface_type = data->v_scale_ratio[i];
 			}
 
-			pr_warn("asdf: [%d], vsr_after_surface_type = %llx, hsr_after_surface_type = %llx",
+			pr_warn("asdf: [%d], vsr_after_surface_type = %llx, hsr_after_surface_type = %llx\n",
 				i, data->vsr_after_surface_type.value, data->hsr_after_surface_type.value
 			);
 			if ((bw_equ(data->rotation_angle[i], bw_int_to_fixed(90)) || bw_equ(data->rotation_angle[i], bw_int_to_fixed(270))) && surface_type[i] != bw_def_display_write_back420_luma && surface_type[i] != bw_def_display_write_back420_chroma) {
@@ -2856,7 +2856,7 @@ static void populate_initial_data(
 		data->h_scale_ratio[num_displays + 4] = fixed31_32_to_bw_fixed(pipe[i].plane_res.scl_data.ratios.horz.value);
 		data->v_scale_ratio[num_displays + 4] = fixed31_32_to_bw_fixed(pipe[i].plane_res.scl_data.ratios.vert.value);
 
-		pr_warn("asdf populate_initial_data: [%d] := [%d], ratios.horz = %llx, ratios.vert = %llx",
+		pr_warn("asdf populate_initial_data: [%d] := [%d], ratios.horz = %llx, ratios.vert = %llx\n",
 			num_displays + 4,
 			i,
 			pipe[i].plane_res.scl_data.ratios.horz.value,
