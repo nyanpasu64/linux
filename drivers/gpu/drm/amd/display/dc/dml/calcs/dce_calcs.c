@@ -438,6 +438,15 @@ static void calculate_bandwidth(
 				data->h_taps[i] = bw_int_to_fixed(1);
 				data->v_taps[i] = bw_int_to_fixed(1);
 			}
+
+			pr_warn("asdf: [%d], v_scale_ratio = %llx, h_scale_ratio = %llx, surface_type = %d",
+				i, data->v_scale_ratio[i].value, data->h_scale_ratio[i].value, surface_type[i]
+			);
+
+			// TODO why overwrite data->hsr_after_surface_type and hsr_after_rotation on
+			// every iteration, and never read them outside of this loop? They should be
+			// stack temporaries instead.
+
 			if (surface_type[i] == bw_def_display_write_back420_chroma || surface_type[i] == bw_def_underlay420_chroma) {
 				data->pitch_in_pixels_after_surface_type[i] = bw_div(data->pitch_in_pixels[i], bw_int_to_fixed(2));
 				data->src_width_after_surface_type = bw_div(data->src_width[i], bw_int_to_fixed(2));
@@ -452,6 +461,10 @@ static void calculate_bandwidth(
 				data->hsr_after_surface_type = data->h_scale_ratio[i];
 				data->vsr_after_surface_type = data->v_scale_ratio[i];
 			}
+
+			pr_warn("asdf: [%d], vsr_after_surface_type = %llx, hsr_after_surface_type = %llx",
+				i, data->vsr_after_surface_type.value, data->hsr_after_surface_type.value
+			);
 			if ((bw_equ(data->rotation_angle[i], bw_int_to_fixed(90)) || bw_equ(data->rotation_angle[i], bw_int_to_fixed(270))) && surface_type[i] != bw_def_display_write_back420_luma && surface_type[i] != bw_def_display_write_back420_chroma) {
 				data->src_width_after_rotation = data->src_height_after_surface_type;
 				data->src_height_after_rotation = data->src_width_after_surface_type;
@@ -464,6 +477,8 @@ static void calculate_bandwidth(
 				data->hsr_after_rotation = data->hsr_after_surface_type;
 				data->vsr_after_rotation = data->vsr_after_surface_type;
 			}
+
+			pr_warn("asdf: data->stereo_mode[%d]=%d\n", i, data->stereo_mode[i]);
 			switch (data->stereo_mode[i]) {
 			case bw_def_top_bottom:
 				data->source_width_pixels[i] = data->src_width_after_rotation;
