@@ -174,6 +174,8 @@ struct resource_pool *dc_create_resource_pool(struct dc  *dc,
 					      const struct dc_init_data *init_data,
 					      enum dce_version dc_version)
 {
+	pr_warn("asdf: dc_create_resource_pool(), version %d\n", dc_version);
+
 	struct resource_pool *res_pool = NULL;
 
 	switch (dc_version) {

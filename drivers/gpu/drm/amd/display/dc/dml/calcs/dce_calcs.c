@@ -3047,6 +3047,7 @@ bool bw_calcs(struct dc_context *ctx,
 	int pipe_count,
 	struct dce_bw_output *calcs_output)
 {
+	pr_warn("asdf: bw_calcs, %d pipes\n", pipe_count);
 	struct bw_calcs_data *data = kzalloc(sizeof(struct bw_calcs_data),
 					     GFP_KERNEL);
 	if (!data)
