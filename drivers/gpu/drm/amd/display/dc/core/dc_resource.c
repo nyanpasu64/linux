@@ -855,6 +855,7 @@ static void calculate_recout(struct pipe_ctx *pipe_ctx)
 
 static void calculate_scaling_ratios(struct pipe_ctx *pipe_ctx)
 {
+	pr_warn("asdf: calculate_scaling_ratios\n");
 	const struct dc_plane_state *plane_state = pipe_ctx->plane_state;
 	const struct dc_stream_state *stream = pipe_ctx->stream;
 	struct rect surf_src = plane_state->src_rect;
@@ -875,6 +876,10 @@ static void calculate_scaling_ratios(struct pipe_ctx *pipe_ctx)
 					surf_src.height,
 					plane_state->dst_rect.height);
 
+	pr_warn("asdf: ratios.horz = %d / %d = %llx, ratios.vert = %d / %d = %llx\n",
+		surf_src.width, plane_state->dst_rect.width, pipe_ctx->plane_res.scl_data.ratios.horz.value,
+		surf_src.height, plane_state->dst_rect.height, pipe_ctx->plane_res.scl_data.ratios.vert.value);
+
 	if (stream->view_format == VIEW_3D_FORMAT_SIDE_BY_SIDE)
 		pipe_ctx->plane_res.scl_data.ratios.horz.value *= 2;
 	else if (stream->view_format == VIEW_3D_FORMAT_TOP_AND_BOTTOM)
@@ -884,6 +889,9 @@ static void calculate_scaling_ratios(struct pipe_ctx *pipe_ctx)
 		pipe_ctx->plane_res.scl_data.ratios.vert.value * in_h, out_h);
 	pipe_ctx->plane_res.scl_data.ratios.horz.value = div64_s64(
 		pipe_ctx->plane_res.scl_data.ratios.horz.value * in_w, out_w);
+	pr_warn("asdf: ratios.horz *= %d / %d := %llx, ratios.vert *= %d / %d := %llx\n",
+		in_w, out_w, pipe_ctx->plane_res.scl_data.ratios.horz.value,
+		in_h, out_h, pipe_ctx->plane_res.scl_data.ratios.vert.value);
 
 	pipe_ctx->plane_res.scl_data.ratios.horz_c = pipe_ctx->plane_res.scl_data.ratios.horz;
 	pipe_ctx->plane_res.scl_data.ratios.vert_c = pipe_ctx->plane_res.scl_data.ratios.vert;
