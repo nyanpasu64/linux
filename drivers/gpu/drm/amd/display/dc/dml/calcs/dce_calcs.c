@@ -2855,6 +2855,13 @@ static void populate_initial_data(
 		data->v_taps[num_displays + 4] = bw_int_to_fixed(pipe[i].plane_res.scl_data.taps.v_taps);
 		data->h_scale_ratio[num_displays + 4] = fixed31_32_to_bw_fixed(pipe[i].plane_res.scl_data.ratios.horz.value);
 		data->v_scale_ratio[num_displays + 4] = fixed31_32_to_bw_fixed(pipe[i].plane_res.scl_data.ratios.vert.value);
+
+		pr_warn("asdf populate_initial_data: [%d] := [%d], ratios.horz = %llx, ratios.vert = %llx",
+			num_displays + 4,
+			i,
+			pipe[i].plane_res.scl_data.ratios.horz.value,
+			pipe[i].plane_res.scl_data.ratios.vert.value);
+
 		switch (pipe[i].plane_state->rotation) {
 		case ROTATION_ANGLE_0:
 			data->rotation_angle[num_displays + 4] = bw_int_to_fixed(0);
