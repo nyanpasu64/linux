@@ -251,9 +251,11 @@ static void calculate_bandwidth(
 	data->scatter_gather_enable_for_pipe[2] = vbios->scatter_gather_enable;
 	data->scatter_gather_enable_for_pipe[3] = vbios->scatter_gather_enable;
 	/*underlay0 same and graphics display pipe0*/
+	pr_warn("asdf: data->interlace_mode[4] = %d\n", data->interlace_mode[4]);
 	data->interlace_mode[0] = data->interlace_mode[4];
 	data->interlace_mode[1] = data->interlace_mode[4];
 	/*underlay1 same and graphics display pipe1*/
+	pr_warn("asdf: data->interlace_mode[5] = %d\n", data->interlace_mode[5]);
 	data->interlace_mode[2] = data->interlace_mode[5];
 	data->interlace_mode[3] = data->interlace_mode[5];
 	/*underlay0 same and graphics display pipe0*/
@@ -489,6 +491,13 @@ static void calculate_bandwidth(
 			else {
 				data->vsr[i] = data->vsr_after_stereo;
 			}
+
+			// BUG! interlace_mode[i] = false even for interlaced displays, but both
+			// hsr_after_stereo and vsr_after_stereo are erroneously 2.000000!
+			pr_warn("asdf: [%d] interlace_mode=%d, hsr=%llx, vsr=%llx\n",
+				i, data->interlace_mode[i], data->hsr[i].value, data->vsr[i].value
+			);
+
 			if (data->panning_and_bezel_adjustment != bw_def_none) {
 				data->source_width_rounded_up_to_chunks[i] = bw_add(bw_floor2(bw_sub(data->source_width_pixels[i], bw_int_to_fixed(1)), bw_int_to_fixed(128)), bw_int_to_fixed(256));
 			}
