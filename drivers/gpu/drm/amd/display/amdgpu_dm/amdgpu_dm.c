@@ -5731,15 +5731,18 @@ static void update_stream_scaling_settings(const struct drm_display_mode *mode,
 	pr_warn("asdf: scaling %dx%d to %dx%d\n", src.width, src.height, dst.width, dst.height);
 
 	if (dm_state) {
+		bool interlaced;
+
 		rmx_type = dm_state->scaling;
+		interlaced = mode->flags & DRM_MODE_FLAG_INTERLACE;
 
 		pr_warn("asdf: rendering to subset %d of xfb, interlaced=%d\n",
-			rmx_type, stream->timing.flags.INTERLACE
+			rmx_type, interlaced
 		);
 
 		if (rmx_type == RMX_ASPECT || rmx_type == RMX_OFF) {
 			// Convert dst to square pixels while correcting its aspect ratio.
-			if (stream->timing.flags.INTERLACE) {
+			if (interlaced) {
 				dst.height *= 2;
 			}
 
@@ -5755,7 +5758,7 @@ static void update_stream_scaling_settings(const struct drm_display_mode *mode,
 			}
 
 			/* If height was modified, it may be odd now. Oh well, just divide anyway. */
-			if (stream->timing.flags.INTERLACE) {
+			if (interlaced) {
 				dst.height /= 2;
 			}
 		} else if (rmx_type == RMX_CENTER) {
