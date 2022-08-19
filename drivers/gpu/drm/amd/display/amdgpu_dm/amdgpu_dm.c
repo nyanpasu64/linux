@@ -5963,6 +5963,8 @@ static void fill_stream_properties_from_drm_display_mode(
 			timing_out->flags.HSYNC_POSITIVE_POLARITY = 1;
 		if (mode_in->flags & DRM_MODE_FLAG_PVSYNC)
 			timing_out->flags.VSYNC_POSITIVE_POLARITY = 1;
+		if (mode_in->flags & DRM_MODE_FLAG_INTERLACE)
+			timing_out->flags.INTERLACE = 1;
 	}
 
 	if (stream->signal == SIGNAL_TYPE_HDMI_TYPE_A) {
