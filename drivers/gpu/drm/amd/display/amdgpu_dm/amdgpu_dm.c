@@ -5717,6 +5717,8 @@ static void update_stream_scaling_settings(const struct drm_display_mode *mode,
 	struct rect src = { 0 }; /* viewport in composition space*/
 	struct rect dst = { 0 }; /* stream addressable area */
 
+	pr_warn("asdf: update_stream_scaling_settings\n");
+
 	/* no mode. nothing to be done */
 	if (!mode)
 		return;
@@ -5726,9 +5728,11 @@ static void update_stream_scaling_settings(const struct drm_display_mode *mode,
 	src.height = mode->vdisplay;
 	dst.width = stream->timing.h_addressable;
 	dst.height = stream->timing.v_addressable;
+	pr_warn("asdf: scaling %dx%d to %dx%d\n", src.width, src.height, dst.width, dst.height);
 
 	if (dm_state) {
 		rmx_type = dm_state->scaling;
+		pr_warn("asdf: rendering to subset %d of xfb\n", rmx_type);
 		if (rmx_type == RMX_ASPECT || rmx_type == RMX_OFF) {
 			if (src.width * dst.height <
 					src.height * dst.width) {
