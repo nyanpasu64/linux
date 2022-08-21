@@ -29,7 +29,7 @@
 struct bios_parser;
 struct bp_encoder_control;
 
-struct cmd_tbl {
+struct cmd_tbl2 {
 	enum bp_result (*dig_encoder_control)(
 		struct bios_parser *bp,
 		struct bp_encoder_control *control);

@@ -546,7 +546,7 @@ static enum bp_result set_pixel_clock_fallback(
  ******************************************************************************
  *****************************************************************************/
 
-static enum bp_result set_crtc_using_dtd_timing_v3(
+static enum bp_result set_crtc2_using_dtd_timing_v3(
 	struct bios_parser *bp,
 	struct bp_hw_crtc_timing_parameters *bp_params);
 
@@ -558,7 +558,7 @@ static void init_set_crtc_timing(struct bios_parser *bp)
 	switch (dtd_version) {
 	case 3:
 		bp->cmd_tbl.set_crtc_timing =
-			set_crtc_using_dtd_timing_v3;
+			set_crtc2_using_dtd_timing_v3;
 		break;
 	default:
 		dm_output_to_console("Don't have set_crtc_timing for v%d\n", dtd_version);
@@ -567,7 +567,7 @@ static void init_set_crtc_timing(struct bios_parser *bp)
 	}
 }
 
-static enum bp_result set_crtc_using_dtd_timing_v3(
+static enum bp_result set_crtc2_using_dtd_timing_v3(
 	struct bios_parser *bp,
 	struct bp_hw_crtc_timing_parameters *bp_params)
 {

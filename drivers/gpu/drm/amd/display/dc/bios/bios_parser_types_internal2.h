@@ -62,7 +62,7 @@ struct bios_parser {
 	const struct bios_parser_helper *bios_helper;
 
 	const struct command_table_helper *cmd_helper;
-	struct cmd_tbl cmd_tbl;
+	struct cmd_tbl2 cmd_tbl;
 
 	bool remap_device_tags;
 };
