@@ -5972,7 +5972,8 @@ static void fill_stream_properties_from_drm_display_mode(
 		timing_out->hdmi_vic = hv_frame.vic;
 	}
 
-	if (is_freesync_video_mode(mode_in, aconnector)) {
+	bool freesync = is_freesync_video_mode(mode_in, aconnector);
+	if (freesync) {
 		timing_out->h_addressable = mode_in->hdisplay;
 		timing_out->h_total = mode_in->htotal;
 		timing_out->h_sync_width = mode_in->hsync_end - mode_in->hsync_start;
@@ -5993,6 +5994,13 @@ static void fill_stream_properties_from_drm_display_mode(
 		timing_out->v_sync_width = mode_in->crtc_vsync_end - mode_in->crtc_vsync_start;
 		timing_out->pix_clk_100hz = mode_in->crtc_clock * 10;
 	}
+	pr_warn(
+		"asdf: fill_stream_properties_from_drm_display_mode() freesync=%d v_total=%d v_addressable=%d v_front_porch=%d v_sync_width=%d",
+		freesync,
+		timing_out->v_total,
+		timing_out->v_addressable,
+		timing_out->v_front_porch,
+		timing_out->v_sync_width);
 
 	timing_out->aspect_ratio = get_aspect_ratio(mode_in);
 
@@ -7113,7 +7121,7 @@ create_validate_stream_for_sink(struct amdgpu_dm_connector *aconnector,
 		dc_result = dc_validate_stream(adev->dm.dc, stream);
 
 		if (dc_result != DC_OK) {
-			DRM_DEBUG_KMS("Mode %dx%d (clk %d) failed DC validation with error %d (%s)\n",
+			pr_warn("asdf: Mode %dx%d (clk %d) failed DC validation with error %d (%s)\n",
 				      drm_mode->hdisplay,
 				      drm_mode->vdisplay,
 				      drm_mode->clock,
@@ -7128,7 +7136,7 @@ create_validate_stream_for_sink(struct amdgpu_dm_connector *aconnector,
 	} while (stream == NULL && requested_bpc >= 6);
 
 	if (dc_result == DC_FAIL_ENC_VALIDATE && !aconnector->force_yuv420_output) {
-		DRM_DEBUG_KMS("Retry forcing YCbCr420 encoding\n");
+		pr_warn("asdf: Retry forcing YCbCr420 encoding\n");
 
 		aconnector->force_yuv420_output = true;
 		stream = create_validate_stream_for_sink(aconnector, drm_mode,
@@ -7454,6 +7462,10 @@ static int dm_encoder_helper_atomic_check(struct drm_encoder *encoder,
 
 	if (!crtc_state->connectors_changed && !crtc_state->mode_changed)
 		return 0;
+
+	pr_warn(
+		"asdf: dm_encoder_helper_atomic_check: mode.vdisplay=%d, adjusted_mode.vdisplay=%d\n",
+		crtc_state->mode.vdisplay, crtc_state->adjusted_mode.vdisplay);
 
 	if (!state->duplicated) {
 		int max_bpc = conn_state->max_requested_bpc;
@@ -10320,6 +10332,7 @@ static int dm_update_crtc_state(struct amdgpu_display_manager *dm,
 							    &aconnector->base);
 
 		if (IS_ERR(drm_new_conn_state)) {
+			pr_warn("asdf: IS_ERR(drm_new_conn_state), presumably unreachable?\n");
 			ret = PTR_ERR_OR_ZERO(drm_new_conn_state);
 			goto fail;
 		}
@@ -10330,6 +10343,9 @@ static int dm_update_crtc_state(struct amdgpu_display_manager *dm,
 		if (!drm_atomic_crtc_needs_modeset(new_crtc_state))
 			goto skip_modeset;
 
+		pr_warn(
+			"asdf: dm_update_crtc_state: mode.vdisplay=%d, adjusted_mode.vdisplay=%d\n",
+			new_crtc_state->mode.vdisplay, new_crtc_state->adjusted_mode.vdisplay);
 		new_stream = create_validate_stream_for_sink(aconnector,
 							     &new_crtc_state->mode,
 							     dm_new_conn_state,
@@ -10343,7 +10359,7 @@ static int dm_update_crtc_state(struct amdgpu_display_manager *dm,
 		 */
 
 		if (!new_stream) {
-			DRM_DEBUG_DRIVER("%s: Failed to create new stream for crtc %d\n",
+			pr_warn("asdf: %s: Failed to create new stream for crtc %d\n",
 					__func__, acrtc->base.base.id);
 			ret = -ENOMEM;
 			goto fail;
@@ -10380,7 +10396,7 @@ static int dm_update_crtc_state(struct amdgpu_display_manager *dm,
 		    dc_is_stream_unchanged(new_stream, dm_old_crtc_state->stream) &&
 		    dc_is_stream_scaling_unchanged(new_stream, dm_old_crtc_state->stream)) {
 			new_crtc_state->mode_changed = false;
-			DRM_DEBUG_DRIVER("Mode change not required, setting mode_changed to %d",
+			pr_warn("asdf: Mode change not required, setting mode_changed to %d",
 					 new_crtc_state->mode_changed);
 		}
 	}
@@ -10434,7 +10450,7 @@ static int dm_update_crtc_state(struct amdgpu_display_manager *dm,
 		if (ret)
 			goto fail;
 
-		DRM_DEBUG_DRIVER("Disabling DRM crtc: %d\n",
+		pr_warn("asdf: Disabling DRM crtc: %d\n",
 				crtc->base.id);
 
 		/* i.e. reset mode */
@@ -11031,7 +11047,7 @@ static int amdgpu_dm_atomic_check(struct drm_device *dev,
 
 	ret = drm_atomic_helper_check_modeset(dev, state);
 	if (ret) {
-		DRM_DEBUG_DRIVER("drm_atomic_helper_check_modeset() failed\n");
+		pr_warn("asdf: drm_atomic_helper_check_modeset() failed\n");
 		goto fail;
 	}
 
@@ -11049,7 +11065,7 @@ static int amdgpu_dm_atomic_check(struct drm_device *dev,
 
 		new_crtc_state = drm_atomic_get_crtc_state(state, new_con_state->crtc);
 		if (IS_ERR(new_crtc_state)) {
-			DRM_DEBUG_DRIVER("drm_atomic_get_crtc_state() failed\n");
+			pr_warn("asdf: drm_atomic_get_crtc_state() failed\n");
 			ret = PTR_ERR(new_crtc_state);
 			goto fail;
 		}
@@ -11065,7 +11081,7 @@ static int amdgpu_dm_atomic_check(struct drm_device *dev,
 			if (drm_atomic_crtc_needs_modeset(new_crtc_state)) {
 				ret = add_affected_mst_dsc_crtcs(state, crtc);
 				if (ret) {
-					DRM_DEBUG_DRIVER("add_affected_mst_dsc_crtcs() failed\n");
+					pr_warn("asdf: add_affected_mst_dsc_crtcs() failed\n");
 					goto fail;
 				}
 			}
@@ -11084,7 +11100,7 @@ static int amdgpu_dm_atomic_check(struct drm_device *dev,
 
 		ret = amdgpu_dm_verify_lut_sizes(new_crtc_state);
 		if (ret) {
-			DRM_DEBUG_DRIVER("amdgpu_dm_verify_lut_sizes() failed\n");
+			pr_warn("asdf: amdgpu_dm_verify_lut_sizes() failed\n");
 			goto fail;
 		}
 
@@ -11093,13 +11109,13 @@ static int amdgpu_dm_atomic_check(struct drm_device *dev,
 
 		ret = drm_atomic_add_affected_connectors(state, crtc);
 		if (ret) {
-			DRM_DEBUG_DRIVER("drm_atomic_add_affected_connectors() failed\n");
+			pr_warn("asdf: drm_atomic_add_affected_connectors() failed\n");
 			goto fail;
 		}
 
 		ret = drm_atomic_add_affected_planes(state, crtc);
 		if (ret) {
-			DRM_DEBUG_DRIVER("drm_atomic_add_affected_planes() failed\n");
+			pr_warn("asdf: drm_atomic_add_affected_planes() failed\n");
 			goto fail;
 		}
 
@@ -11138,7 +11154,7 @@ static int amdgpu_dm_atomic_check(struct drm_device *dev,
 
 			if (IS_ERR(new_plane_state)) {
 				ret = PTR_ERR(new_plane_state);
-				DRM_DEBUG_DRIVER("new_plane_state is BAD\n");
+				pr_warn("asdf: new_plane_state is BAD\n");
 				goto fail;
 			}
 		}
@@ -11152,7 +11168,7 @@ static int amdgpu_dm_atomic_check(struct drm_device *dev,
 					    false,
 					    &lock_and_validation_needed);
 		if (ret) {
-			DRM_DEBUG_DRIVER("dm_update_plane_state() failed\n");
+			pr_warn("asdf: dm_update_plane_state() failed\n");
 			goto fail;
 		}
 	}
@@ -11165,20 +11181,22 @@ static int amdgpu_dm_atomic_check(struct drm_device *dev,
 					   false,
 					   &lock_and_validation_needed);
 		if (ret) {
-			DRM_DEBUG_DRIVER("DISABLE: dm_update_crtc_state() failed\n");
+			pr_warn("asdf: DISABLE: dm_update_crtc_state() failed\n");
 			goto fail;
 		}
 	}
 
 	/* Enable all crtcs which require enable */
 	for_each_oldnew_crtc_in_state(state, crtc, old_crtc_state, new_crtc_state, i) {
+		// pr_warn("asdf: { dm_update_crtc_state(true)\n");
 		ret = dm_update_crtc_state(&adev->dm, state, crtc,
 					   old_crtc_state,
 					   new_crtc_state,
 					   true,
 					   &lock_and_validation_needed);
+		// pr_warn("asdf: } dm_update_crtc_state(true) = %d\n", ret);
 		if (ret) {
-			DRM_DEBUG_DRIVER("ENABLE: dm_update_crtc_state() failed\n");
+			pr_warn("asdf: ENABLE: dm_update_crtc_state() failed\n");
 			goto fail;
 		}
 	}
@@ -11191,7 +11209,7 @@ static int amdgpu_dm_atomic_check(struct drm_device *dev,
 					    true,
 					    &lock_and_validation_needed);
 		if (ret) {
-			DRM_DEBUG_DRIVER("dm_update_plane_state() failed\n");
+			pr_warn("asdf: dm_update_plane_state() failed\n");
 			goto fail;
 		}
 	}
@@ -11199,21 +11217,21 @@ static int amdgpu_dm_atomic_check(struct drm_device *dev,
 	/* Run this here since we want to validate the streams we created */
 	ret = drm_atomic_helper_check_planes(dev, state);
 	if (ret) {
-		DRM_DEBUG_DRIVER("drm_atomic_helper_check_planes() failed\n");
+		pr_warn("asdf: drm_atomic_helper_check_planes() failed\n");
 		goto fail;
 	}
 
 	for_each_new_crtc_in_state(state, crtc, new_crtc_state, i) {
 		dm_new_crtc_state = to_dm_crtc_state(new_crtc_state);
 		if (dm_new_crtc_state->mpo_requested)
-			DRM_DEBUG_DRIVER("MPO enablement requested on crtc:[%p]\n", crtc);
+			pr_warn("asdf: MPO enablement requested on crtc:[%p]\n", crtc);
 	}
 
 	/* Check cursor planes scaling */
 	for_each_new_crtc_in_state(state, crtc, new_crtc_state, i) {
 		ret = dm_check_crtc_cursor(state, crtc, new_crtc_state);
 		if (ret) {
-			DRM_DEBUG_DRIVER("dm_check_crtc_cursor() failed\n");
+			pr_warn("asdf: dm_check_crtc_cursor() failed\n");
 			goto fail;
 		}
 	}
@@ -11303,25 +11321,25 @@ static int amdgpu_dm_atomic_check(struct drm_device *dev,
 	if (lock_and_validation_needed) {
 		ret = dm_atomic_get_state(state, &dm_state);
 		if (ret) {
-			DRM_DEBUG_DRIVER("dm_atomic_get_state() failed\n");
+			pr_warn("asdf: dm_atomic_get_state() failed\n");
 			goto fail;
 		}
 
 		ret = do_aquire_global_lock(dev, state);
 		if (ret) {
-			DRM_DEBUG_DRIVER("do_aquire_global_lock() failed\n");
+			pr_warn("asdf: do_aquire_global_lock() failed\n");
 			goto fail;
 		}
 
 #if defined(CONFIG_DRM_AMD_DC_DCN)
 		if (!compute_mst_dsc_configs_for_state(state, dm_state->context, vars)) {
-			DRM_DEBUG_DRIVER("compute_mst_dsc_configs_for_state() failed\n");
+			pr_warn("asdf: compute_mst_dsc_configs_for_state() failed\n");
 			goto fail;
 		}
 
 		ret = dm_update_mst_vcpi_slots_for_dsc(state, dm_state->context, vars);
 		if (ret) {
-			DRM_DEBUG_DRIVER("dm_update_mst_vcpi_slots_for_dsc() failed\n");
+			pr_warn("asdf: dm_update_mst_vcpi_slots_for_dsc() failed\n");
 			goto fail;
 		}
 #endif
@@ -11334,12 +11352,12 @@ static int amdgpu_dm_atomic_check(struct drm_device *dev,
 		 */
 		ret = drm_dp_mst_atomic_check(state);
 		if (ret) {
-			DRM_DEBUG_DRIVER("drm_dp_mst_atomic_check() failed\n");
+			pr_warn("asdf: drm_dp_mst_atomic_check() failed\n");
 			goto fail;
 		}
 		status = dc_validate_global_state(dc, dm_state->context, true);
 		if (status != DC_OK) {
-			DRM_DEBUG_DRIVER("DC global validation failure: %s (%d)",
+			pr_warn("asdf: DC global validation failure: %s (%d)",
 				       dc_status_to_str(status), status);
 			ret = -EINVAL;
 			goto fail;
@@ -11406,11 +11424,11 @@ static int amdgpu_dm_atomic_check(struct drm_device *dev,
 
 fail:
 	if (ret == -EDEADLK)
-		DRM_DEBUG_DRIVER("Atomic check stopped to avoid deadlock.\n");
+		pr_warn("asdf: Atomic check stopped to avoid deadlock.\n");
 	else if (ret == -EINTR || ret == -EAGAIN || ret == -ERESTARTSYS)
-		DRM_DEBUG_DRIVER("Atomic check stopped due to signal.\n");
+		pr_warn("asdf: Atomic check stopped due to signal.\n");
 	else
-		DRM_DEBUG_DRIVER("Atomic check failed with err: %d \n", ret);
+		pr_warn("asdf: Atomic check failed with err: %d \n", ret);
 
 	trace_amdgpu_dm_atomic_check_finish(state, ret);
 

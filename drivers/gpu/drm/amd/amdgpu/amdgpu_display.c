@@ -268,6 +268,7 @@ cleanup:
 int amdgpu_display_crtc_set_config(struct drm_mode_set *set,
 				   struct drm_modeset_acquire_ctx *ctx)
 {
+	pr_warn("asdf: amdgpu_display_crtc_set_config\n");
 	struct drm_device *dev;
 	struct amdgpu_device *adev;
 	struct drm_crtc *crtc;

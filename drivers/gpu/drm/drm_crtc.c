@@ -546,6 +546,7 @@ static int __drm_mode_set_config_internal(struct drm_mode_set *set,
 
 	fb = set->fb;
 
+	pr_warn("asdf __drm_mode_set_config_internal: crtc->funcs->set_config() = %pF()\n", crtc->funcs->set_config);
 	ret = crtc->funcs->set_config(set, ctx);
 	if (ret == 0) {
 		struct drm_plane *plane = crtc->primary;
@@ -646,6 +647,8 @@ int drm_mode_setcrtc(struct drm_device *dev, void *data,
 	int ret;
 	int i;
 
+	pr_warn("asdf: { drm_mode_setcrtc\n");
+
 	if (!drm_core_check_feature(dev, DRIVER_MODESET))
 		return -EOPNOTSUPP;
 
@@ -658,10 +661,10 @@ int drm_mode_setcrtc(struct drm_device *dev, void *data,
 
 	crtc = drm_crtc_find(dev, file_priv, crtc_req->crtc_id);
 	if (!crtc) {
-		DRM_DEBUG_KMS("Unknown CRTC ID %d\n", crtc_req->crtc_id);
+		pr_warn("asdf: Unknown CRTC ID %d\n", crtc_req->crtc_id);
 		return -ENOENT;
 	}
-	DRM_DEBUG_KMS("[CRTC:%d:%s]\n", crtc->base.id, crtc->name);
+	pr_warn("asdf: [CRTC:%d:%s]\n", crtc->base.id, crtc->name);
 
 	plane = crtc->primary;
 
@@ -684,7 +687,7 @@ int drm_mode_setcrtc(struct drm_device *dev, void *data,
 				old_fb = plane->fb;
 
 			if (!old_fb) {
-				DRM_DEBUG_KMS("CRTC doesn't have current FB\n");
+				pr_warn("asdf: CRTC doesn't have current FB\n");
 				ret = -EINVAL;
 				goto out;
 			}
@@ -695,7 +698,7 @@ int drm_mode_setcrtc(struct drm_device *dev, void *data,
 		} else {
 			fb = drm_framebuffer_lookup(dev, file_priv, crtc_req->fb_id);
 			if (!fb) {
-				DRM_DEBUG_KMS("Unknown FB ID%d\n",
+				pr_warn("asdf: Unknown FB ID%d\n",
 						crtc_req->fb_id);
 				ret = -ENOENT;
 				goto out;
@@ -709,7 +712,7 @@ int drm_mode_setcrtc(struct drm_device *dev, void *data,
 		}
 		if (!file_priv->aspect_ratio_allowed &&
 		    (crtc_req->mode.flags & DRM_MODE_FLAG_PIC_AR_MASK) != DRM_MODE_FLAG_PIC_AR_NONE) {
-			DRM_DEBUG_KMS("Unexpected aspect-ratio flag bits\n");
+			pr_warn("asdf: Unexpected aspect-ratio flag bits\n");
 			ret = -EINVAL;
 			goto out;
 		}
@@ -717,7 +720,7 @@ int drm_mode_setcrtc(struct drm_device *dev, void *data,
 
 		ret = drm_mode_convert_umode(dev, mode, &crtc_req->mode);
 		if (ret) {
-			DRM_DEBUG_KMS("Invalid mode (ret=%d, status=%s)\n",
+			pr_warn("asdf: Invalid mode (ret=%d, status=%s)\n",
 				      ret, drm_get_mode_status_name(mode->status));
 			drm_mode_debug_printmodeline(mode);
 			goto out;
@@ -735,7 +738,7 @@ int drm_mode_setcrtc(struct drm_device *dev, void *data,
 							   fb->format->format,
 							   fb->modifier);
 			if (ret) {
-				DRM_DEBUG_KMS("Invalid pixel format %p4cc, modifier 0x%llx\n",
+				pr_warn("asdf: Invalid pixel format %p4cc, modifier 0x%llx\n",
 					      &fb->format->format,
 					      fb->modifier);
 				goto out;
@@ -744,19 +747,21 @@ int drm_mode_setcrtc(struct drm_device *dev, void *data,
 
 		ret = drm_crtc_check_viewport(crtc, crtc_req->x, crtc_req->y,
 					      mode, fb);
-		if (ret)
+		if (ret) {
+			pr_warn("asdf: Invalid viewport\n");
 			goto out;
+		}
 
 	}
 
 	if (crtc_req->count_connectors == 0 && mode) {
-		DRM_DEBUG_KMS("Count connectors is 0 but mode set\n");
+		pr_warn("asdf: Count connectors is 0 but mode set\n");
 		ret = -EINVAL;
 		goto out;
 	}
 
 	if (crtc_req->count_connectors > 0 && (!mode || !fb)) {
-		DRM_DEBUG_KMS("Count connectors is %d but no mode or fb set\n",
+		pr_warn("asdf: Count connectors is %d but no mode or fb set\n",
 			  crtc_req->count_connectors);
 		ret = -EINVAL;
 		goto out;
@@ -779,6 +784,7 @@ int drm_mode_setcrtc(struct drm_device *dev, void *data,
 			goto out;
 		}
 
+		pr_warn("asdf: drm_mode_setcrtc processing %d connectors\n", crtc_req->count_connectors);
 		for (i = 0; i < crtc_req->count_connectors; i++) {
 			connector_set[i] = NULL;
 			set_connectors_ptr = (uint32_t __user *)(unsigned long)crtc_req->set_connectors_ptr;
@@ -789,12 +795,12 @@ int drm_mode_setcrtc(struct drm_device *dev, void *data,
 
 			connector = drm_connector_lookup(dev, file_priv, out_id);
 			if (!connector) {
-				DRM_DEBUG_KMS("Connector id %d unknown\n",
+				pr_warn("asdf: Connector id %d unknown\n",
 						out_id);
 				ret = -ENOENT;
 				goto out;
 			}
-			DRM_DEBUG_KMS("[CONNECTOR:%d:%s]\n",
+			pr_warn("asdf: drm_mode_setcrtc [CONNECTOR:%d:%s]\n",
 					connector->base.id,
 					connector->name);
 
@@ -810,10 +816,14 @@ int drm_mode_setcrtc(struct drm_device *dev, void *data,
 	set.num_connectors = crtc_req->count_connectors;
 	set.fb = fb;
 
-	if (drm_drv_uses_atomic_modeset(dev))
+	if (drm_drv_uses_atomic_modeset(dev)) {
+		pr_warn("asdf: drm_mode_setcrtc: { crtc->funcs->set_config()\n");
 		ret = crtc->funcs->set_config(&set, &ctx);
-	else
+		pr_warn("asdf: drm_mode_setcrtc: } crtc->funcs->set_config() = %d\n", ret);
+	} else {
+		pr_warn("asdf: __drm_mode_set_config_internal()\n");
 		ret = __drm_mode_set_config_internal(&set, &ctx);
+	}
 
 out:
 	if (fb)
@@ -835,6 +845,7 @@ out:
 
 	DRM_MODESET_LOCK_ALL_END(dev, ctx, ret);
 
+	pr_warn("asdf: } drm_mode_setcrtc = %d\n", ret);
 	return ret;
 }
 

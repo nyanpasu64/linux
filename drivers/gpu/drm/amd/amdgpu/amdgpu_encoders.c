@@ -164,6 +164,7 @@ u16 amdgpu_encoder_get_dp_bridge_encoder_id(struct drm_encoder *encoder)
 void amdgpu_panel_mode_fixup(struct drm_encoder *encoder,
 			     struct drm_display_mode *adjusted_mode)
 {
+	pr_warn("asdf: amdgpu_panel_mode_fixup\n");
 	struct amdgpu_encoder *amdgpu_encoder = to_amdgpu_encoder(encoder);
 	struct drm_display_mode *native_mode = &amdgpu_encoder->native_mode;
 	unsigned hblank = native_mode->htotal - native_mode->hdisplay;

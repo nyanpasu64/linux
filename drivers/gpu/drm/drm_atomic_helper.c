@@ -3023,6 +3023,7 @@ EXPORT_SYMBOL(drm_atomic_helper_disable_plane);
 int drm_atomic_helper_set_config(struct drm_mode_set *set,
 				 struct drm_modeset_acquire_ctx *ctx)
 {
+	pr_warn("asdf: = drm_atomic_helper_set_config()\n");
 	struct drm_atomic_state *state;
 	struct drm_crtc *crtc = set->crtc;
 	int ret = 0;
@@ -3032,15 +3033,21 @@ int drm_atomic_helper_set_config(struct drm_mode_set *set,
 		return -ENOMEM;
 
 	state->acquire_ctx = ctx;
+	pr_warn("asdf: { __drm_atomic_helper_set_config()\n");
 	ret = __drm_atomic_helper_set_config(set, state);
+	pr_warn("asdf: } __drm_atomic_helper_set_config() = %d\n", ret);
 	if (ret != 0)
 		goto fail;
 
+	pr_warn("asdf: { handle_conflicting_encoders()\n");
 	ret = handle_conflicting_encoders(state, true);
+	pr_warn("asdf: } handle_conflicting_encoders() = %d\n", ret);
 	if (ret)
 		goto fail;
 
+	pr_warn("asdf: { drm_atomic_commit()\n");
 	ret = drm_atomic_commit(state);
+	pr_warn("asdf: } drm_atomic_commit() = %d\n", ret);
 
 fail:
 	drm_atomic_state_put(state);

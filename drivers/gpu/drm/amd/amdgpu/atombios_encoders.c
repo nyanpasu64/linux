@@ -283,6 +283,8 @@ bool amdgpu_atombios_encoder_mode_fixup(struct drm_encoder *encoder,
 				 struct drm_display_mode *adjusted_mode)
 {
 	struct amdgpu_encoder *amdgpu_encoder = to_amdgpu_encoder(encoder);
+	pr_warn("asdf: amdgpu_atombios_encoder_mode_fixup, rmx_type=%d\n",
+		amdgpu_encoder->rmx_type);
 
 	/* set the active encoder to connector routing */
 	amdgpu_encoder_set_active_device(encoder);
