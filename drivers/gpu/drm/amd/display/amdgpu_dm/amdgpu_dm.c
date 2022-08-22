@@ -7465,13 +7465,14 @@ static int dm_encoder_helper_atomic_check(struct drm_encoder *encoder,
 	mst_mgr = &aconnector->mst_port->mst_mgr;
 
 	if (!crtc_state->connectors_changed && !crtc_state->mode_changed)
-		return 0;
+		pr_warn("nothing changed, processing anyway\n");
 
 	pr_warn(
 		"asdf: dm_encoder_helper_atomic_check: mode.vdisplay=%d, adjusted_mode.vdisplay=%d\n",
 		crtc_state->mode.vdisplay, crtc_state->adjusted_mode.vdisplay);
 
 	orig_adjusted_mode = crtc_state->adjusted_mode;
+	// please god i hope this is idempotent
 	amdgpu_atombios_encoder_mode_fixup(encoder, &orig_adjusted_mode, adjusted_mode);
 
 	pr_warn(
