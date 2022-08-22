@@ -7456,15 +7456,12 @@ static int dm_encoder_helper_atomic_check(struct drm_encoder *encoder,
 	enum dc_color_depth color_depth;
 	int clock, bpp = 0;
 	bool is_y420 = false;
-	struct drm_display_mode orig_adjusted_mode;
 
 	pr_warn(
 		"asdf: dm_encoder_helper_atomic_check: mode.vdisplay=%d, adjusted_mode.vdisplay=%d\n",
 		crtc_state->mode.vdisplay, crtc_state->adjusted_mode.vdisplay);
 
-	orig_adjusted_mode = crtc_state->adjusted_mode;
-	// please god i hope this is idempotent
-	amdgpu_atombios_encoder_mode_fixup(encoder, &orig_adjusted_mode, adjusted_mode);
+	amdgpu_atombios_encoder_mode_fixup(encoder, &crtc_state->mode, adjusted_mode);
 
 	pr_warn(
 		"asdf: dm_encoder_helper_atomic_check fixup: adjusted_mode.vdisplay=%d\n",
