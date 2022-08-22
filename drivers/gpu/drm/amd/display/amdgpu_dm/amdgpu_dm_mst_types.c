@@ -395,6 +395,7 @@ static int dm_dp_mst_atomic_check(struct drm_connector *connector,
 			return 0;
 		}
 
+	// FIXME call amdgpu_atombios_encoder_mode_fixup()
 	return drm_dp_atomic_release_vcpi_slots(state,
 						mst_mgr,
 						mst_port);
@@ -1251,6 +1252,7 @@ void pre_validate_dsc(struct drm_atomic_state *state,
 			dm_new_conn_state = to_dm_connector_state(drm_new_conn_state);
 			dm_old_crtc_state = to_dm_crtc_state(state->crtcs[ind].old_state);
 
+			// FIXME pass in new_state->adjusted_mode
 			local_dc_state->streams[i] =
 				create_validate_stream_for_sink(aconnector,
 								&state->crtcs[ind].new_state->mode,
