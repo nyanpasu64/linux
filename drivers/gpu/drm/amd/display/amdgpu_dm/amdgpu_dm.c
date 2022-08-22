@@ -7456,6 +7456,10 @@ static int dm_encoder_helper_atomic_check(struct drm_encoder *encoder,
 	int clock, bpp = 0;
 	bool is_y420 = false;
 
+	pr_warn(
+		"asdf: dm_encoder_helper_atomic_check: mode.vdisplay=%d, adjusted_mode.vdisplay=%d\n",
+		crtc_state->mode.vdisplay, crtc_state->adjusted_mode.vdisplay);
+
 	if (!aconnector->port || !aconnector->dc_sink)
 		return 0;
 
@@ -7464,10 +7468,6 @@ static int dm_encoder_helper_atomic_check(struct drm_encoder *encoder,
 
 	if (!crtc_state->connectors_changed && !crtc_state->mode_changed)
 		return 0;
-
-	pr_warn(
-		"asdf: dm_encoder_helper_atomic_check: mode.vdisplay=%d, adjusted_mode.vdisplay=%d\n",
-		crtc_state->mode.vdisplay, crtc_state->adjusted_mode.vdisplay);
 
 	if (!state->duplicated) {
 		int max_bpc = conn_state->max_requested_bpc;
