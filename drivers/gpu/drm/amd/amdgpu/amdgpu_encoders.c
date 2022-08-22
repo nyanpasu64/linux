@@ -205,6 +205,11 @@ void amdgpu_panel_mode_fixup(struct drm_encoder *encoder,
 void amdgpu_interlace_mode_fixup(
 	const struct drm_display_mode *mode, struct drm_display_mode *adjusted_mode
 ) {
+	// adjusted_mode->not_crtc is effectively copied from *mode.
+	//
+	// adjusted_mode->crtc is effectively copied from *mode, except crtc_blank_* is
+	// computed by drm_mode_set_crtcinfo().
+
 	pr_warn("asdf: amdgpu_interlace_mode_fixup\n");
 	unsigned hblank = mode->htotal - mode->hdisplay;
 	unsigned vblank = mode->vtotal - mode->vdisplay;
