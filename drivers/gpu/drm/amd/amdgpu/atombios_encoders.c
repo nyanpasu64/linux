@@ -302,7 +302,7 @@ bool amdgpu_atombios_encoder_mode_fixup(struct drm_encoder *encoder,
 	/* get the native mode for scaling */
 	if (amdgpu_encoder->active_device & (ATOM_DEVICE_LCD_SUPPORT))
 		amdgpu_panel_mode_fixup(encoder, adjusted_mode);
-	else if (amdgpu_encoder->rmx_type != RMX_OFF)
+	else if (amdgpu_encoder->rmx_type != RMX_OFF || (mode->flags & DRM_MODE_FLAG_INTERLACE))
 		amdgpu_panel_mode_fixup(encoder, adjusted_mode);
 
 	if ((amdgpu_encoder->active_device & (ATOM_DEVICE_DFP_SUPPORT | ATOM_DEVICE_LCD_SUPPORT)) ||

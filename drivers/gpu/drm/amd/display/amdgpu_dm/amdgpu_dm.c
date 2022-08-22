@@ -45,6 +45,7 @@
 #include "amdgpu_display.h"
 #include "amdgpu_ucode.h"
 #include "atom.h"
+#include "atombios_encoders.h"
 #include "amdgpu_dm.h"
 #ifdef CONFIG_DRM_AMD_DC_HDCP
 #include "amdgpu_dm_hdcp.h"
@@ -7449,12 +7450,13 @@ static int dm_encoder_helper_atomic_check(struct drm_encoder *encoder,
 	struct drm_connector *connector = conn_state->connector;
 	struct amdgpu_dm_connector *aconnector = to_amdgpu_dm_connector(connector);
 	struct dm_connector_state *dm_new_connector_state = to_dm_connector_state(conn_state);
-	const struct drm_display_mode *adjusted_mode = &crtc_state->adjusted_mode;
+	struct drm_display_mode *adjusted_mode = &crtc_state->adjusted_mode;
 	struct drm_dp_mst_topology_mgr *mst_mgr;
 	struct drm_dp_mst_port *mst_port;
 	enum dc_color_depth color_depth;
 	int clock, bpp = 0;
 	bool is_y420 = false;
+	struct drm_display_mode orig_adjusted_mode;
 
 	if (!aconnector->port || !aconnector->dc_sink)
 		return 0;
@@ -7468,6 +7470,13 @@ static int dm_encoder_helper_atomic_check(struct drm_encoder *encoder,
 	pr_warn(
 		"asdf: dm_encoder_helper_atomic_check: mode.vdisplay=%d, adjusted_mode.vdisplay=%d\n",
 		crtc_state->mode.vdisplay, crtc_state->adjusted_mode.vdisplay);
+
+	orig_adjusted_mode = crtc_state->adjusted_mode;
+	amdgpu_atombios_encoder_mode_fixup(encoder, &orig_adjusted_mode, adjusted_mode);
+
+	pr_warn(
+		"asdf: dm_encoder_helper_atomic_check fixup: adjusted_mode.vdisplay=%d\n",
+		crtc_state->adjusted_mode.vdisplay);
 
 	if (!state->duplicated) {
 		int max_bpc = conn_state->max_requested_bpc;
@@ -10349,7 +10358,7 @@ static int dm_update_crtc_state(struct amdgpu_display_manager *dm,
 			"asdf: dm_update_crtc_state: mode.vdisplay=%d, adjusted_mode.vdisplay=%d\n",
 			new_crtc_state->mode.vdisplay, new_crtc_state->adjusted_mode.vdisplay);
 		new_stream = create_validate_stream_for_sink(aconnector,
-							     &new_crtc_state->mode,
+							     &new_crtc_state->adjusted_mode,
 							     dm_new_conn_state,
 							     dm_old_crtc_state->stream);
 
