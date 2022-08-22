@@ -287,15 +287,6 @@ static void dce110_stream_encoder_dp_set_stream_attribute(
 
 	struct dce110_stream_encoder *enc110 = DCE110STRENC_FROM_STRENC(enc);
 	struct dc_crtc_timing hw_crtc_timing = *crtc_timing;
-	if (hw_crtc_timing.flags.INTERLACE) {
-		/*the input timing is in VESA spec format with Interlace flag =1*/
-		hw_crtc_timing.v_total /= 2;
-		hw_crtc_timing.v_border_top /= 2;
-		hw_crtc_timing.v_addressable /= 2;
-		hw_crtc_timing.v_border_bottom /= 2;
-		hw_crtc_timing.v_front_porch /= 2;
-		hw_crtc_timing.v_sync_width /= 2;
-	}
 	/* set pixel encoding */
 	switch (hw_crtc_timing.pixel_encoding) {
 	case PIXEL_ENCODING_YCBCR422:
