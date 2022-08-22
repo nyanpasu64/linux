@@ -601,6 +601,9 @@ bool amdgpu_display_crtc_scaling_mode_fixup(struct drm_crtc *crtc,
 				struct drm_display_mode *adjusted_mode);
 void amdgpu_panel_mode_fixup(struct drm_encoder *encoder,
 			     struct drm_display_mode *adjusted_mode);
+void amdgpu_interlace_mode_fixup(
+	const struct drm_display_mode *mode, struct drm_display_mode *adjusted_mode
+);
 int amdgpu_display_crtc_idx_to_irq_type(struct amdgpu_device *adev, int crtc);
 
 bool amdgpu_crtc_get_scanout_position(struct drm_crtc *crtc,

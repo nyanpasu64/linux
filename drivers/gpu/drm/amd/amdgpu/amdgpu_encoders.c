@@ -200,6 +200,45 @@ void amdgpu_panel_mode_fixup(struct drm_encoder *encoder,
 	adjusted_mode->crtc_vtotal = adjusted_mode->crtc_vdisplay + vblank;
 	adjusted_mode->crtc_vsync_start = adjusted_mode->crtc_vdisplay + vover;
 	adjusted_mode->crtc_vsync_end = adjusted_mode->crtc_vsync_start + vsync_width;
+}
+
+void amdgpu_interlace_mode_fixup(
+	const struct drm_display_mode *mode, struct drm_display_mode *adjusted_mode
+) {
+	pr_warn("asdf: amdgpu_interlace_mode_fixup\n");
+	unsigned hblank = mode->htotal - mode->hdisplay;
+	unsigned vblank = mode->vtotal - mode->vdisplay;
+	unsigned hover = mode->hsync_start - mode->hdisplay;
+	unsigned vover = mode->vsync_start - mode->vdisplay;
+	unsigned hsync_width = mode->hsync_end - mode->hsync_start;
+	unsigned vsync_width = mode->vsync_end - mode->vsync_start;
+
+	adjusted_mode->clock = mode->clock;
+	adjusted_mode->flags = mode->flags;
+
+	adjusted_mode->hdisplay = mode->hdisplay;
+	adjusted_mode->vdisplay = mode->vdisplay;
+
+	adjusted_mode->htotal = mode->hdisplay + hblank;
+	adjusted_mode->hsync_start = mode->hdisplay + hover;
+	adjusted_mode->hsync_end = adjusted_mode->hsync_start + hsync_width;
+
+	adjusted_mode->vtotal = mode->vdisplay + vblank;
+	adjusted_mode->vsync_start = mode->vdisplay + vover;
+	adjusted_mode->vsync_end = adjusted_mode->vsync_start + vsync_width;
+
+	drm_mode_set_crtcinfo(adjusted_mode, CRTC_INTERLACE_HALVE_V);
+
+	adjusted_mode->crtc_hdisplay = mode->hdisplay;
+	adjusted_mode->crtc_vdisplay = mode->vdisplay;
+
+	adjusted_mode->crtc_htotal = adjusted_mode->crtc_hdisplay + hblank;
+	adjusted_mode->crtc_hsync_start = adjusted_mode->crtc_hdisplay + hover;
+	adjusted_mode->crtc_hsync_end = adjusted_mode->crtc_hsync_start + hsync_width;
+
+	adjusted_mode->crtc_vtotal = adjusted_mode->crtc_vdisplay + vblank;
+	adjusted_mode->crtc_vsync_start = adjusted_mode->crtc_vdisplay + vover;
+	adjusted_mode->crtc_vsync_end = adjusted_mode->crtc_vsync_start + vsync_width;
 
 }
 
