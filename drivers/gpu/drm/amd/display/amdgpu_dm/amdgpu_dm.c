@@ -5966,6 +5966,8 @@ static void fill_stream_properties_from_drm_display_mode(
 			timing_out->flags.HSYNC_POSITIVE_POLARITY = 1;
 		if (mode_in->flags & DRM_MODE_FLAG_PVSYNC)
 			timing_out->flags.VSYNC_POSITIVE_POLARITY = 1;
+		if (mode_in->flags & DRM_MODE_FLAG_INTERLACE)
+			timing_out->flags.INTERLACE = 1;
 	}
 
 	if (stream->signal == SIGNAL_TYPE_HDMI_TYPE_A) {
@@ -6536,7 +6538,7 @@ create_stream_for_sink(struct amdgpu_dm_connector *aconnector,
 
 	if (recalculate_timing)
 		drm_mode_set_crtcinfo(&saved_mode, 0);
-	else if (!dm_state)
+	else if (!dm_state || mode.flags & DRM_MODE_FLAG_INTERLACE)
 		drm_mode_set_crtcinfo(&mode, 0);
 
        /*
@@ -7151,8 +7153,7 @@ enum drm_mode_status amdgpu_dm_connector_mode_valid(struct drm_connector *connec
 	struct dc_stream_state *stream;
 	struct amdgpu_dm_connector *aconnector = to_amdgpu_dm_connector(connector);
 
-	if ((mode->flags & DRM_MODE_FLAG_INTERLACE) ||
-			(mode->flags & DRM_MODE_FLAG_DBLSCAN))
+	if (mode->flags & DRM_MODE_FLAG_DBLSCAN)
 		return result;
 
 	/*
@@ -8441,7 +8442,7 @@ void amdgpu_dm_connector_init_helper(struct amdgpu_display_manager *dm,
 
 	aconnector->connector_id = link_index;
 	aconnector->dc_link = link;
-	aconnector->base.interlace_allowed = false;
+	aconnector->base.interlace_allowed = true;
 	aconnector->base.doublescan_allowed = false;
 	aconnector->base.stereo_allowed = false;
 	aconnector->base.dpms = DRM_MODE_DPMS_OFF;

@@ -2625,6 +2625,9 @@ static void update_scaler(struct pipe_ctx *pipe_ctx)
 	pipe_ctx->plane_res.scl_data.lb_params.alpha_en = per_pixel_alpha;
 	pipe_ctx->plane_res.scl_data.lb_params.depth = LB_PIXEL_DEPTH_36BPP;
 	/* scaler configuration */
+	pipe_ctx->plane_res.scl_data.lb_params.interleave_en =
+			pipe_ctx->stream->timing.flags.INTERLACE? 1:0;
+
 	pipe_ctx->plane_res.dpp->funcs->dpp_set_scaler(
 			pipe_ctx->plane_res.dpp, &pipe_ctx->plane_res.scl_data);
 }
@@ -3606,8 +3609,7 @@ int dcn10_get_vupdate_offset_from_vsync(struct pipe_ctx *pipe_ctx)
 
 	asic_blank_end = (patched_crtc_timing.v_total -
 			vesa_sync_start -
-			patched_crtc_timing.v_border_top)
-			* interlace_factor;
+			patched_crtc_timing.v_border_top); // * interlace_factor;
 
 	vertical_line_start = asic_blank_end -
 			pipe_ctx->pipe_dlg_param.vstartup_start + 1;

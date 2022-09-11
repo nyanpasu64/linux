@@ -576,10 +576,6 @@ bool optc1_validate_timing(
 		timing->timing_3d_format != TIMING_3D_FORMAT_INBAND_FA)
 		return false;
 
-	/* Temporarily blocking interlacing mode until it's supported */
-	if (timing->flags.INTERLACE == 1)
-		return false;
-
 	/* Check maximum number of pixels supported by Timing Generator
 	 * (Currently will never fail, in order to fail needs display which
 	 * needs more than 8192 horizontal and

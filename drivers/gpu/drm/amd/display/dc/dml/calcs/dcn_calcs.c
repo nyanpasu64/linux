@@ -446,6 +446,7 @@ static void pipe_ctx_to_e2e_pipe_params (
 	input->dest.vupdate_offset = pipe->pipe_dlg_param.vupdate_offset;
 	input->dest.vupdate_offset = pipe->pipe_dlg_param.vupdate_offset;
 	input->dest.vupdate_width = pipe->pipe_dlg_param.vupdate_width;
+	input->dest.interlaced = pipe->stream->timing.flags.INTERLACE;
 
 }
 
