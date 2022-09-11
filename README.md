@@ -39,3 +39,18 @@ reboot
 
 https://gitlab.freedesktop.org/drm/amd/-/issues/1636
 https://docs.google.com/document/d/1UUXKck_suy_klkz4eFa0bKv18I5SXsp0LbVcgAcrRCE/edit#heading=h.s0x60se6isoi
+
+# does xrandr underscan avoid double-scaling?
+
+```sh
+# remove 64,64 pixels from each edge of the screen. cannot trim more than 128 on amdgpu.
+xrandr --output DP-1 --set "underscan hborder" 128 --set "underscan vborder" 128
+xrandr --output DP-1 --set underscan on
+
+# blurry!
+xrandr --output DP-1 --scale-from 2432x1312 #2304x1184
+```
+
+xrandr scales framebuffer pixels twice, once to the output resolution, and once to the output underscan resolution.
+
+this is a big problem for vertical scaling, not horizontal.
