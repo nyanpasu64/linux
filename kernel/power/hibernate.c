@@ -418,6 +418,7 @@ int hibernation_snapshot(int platform_mode)
 	}
 
 	console_suspend_all();
+	pm_restrict_gfp_mask();
 
 	error = dpm_suspend(PMSG_FREEZE);
 
@@ -438,9 +439,7 @@ int hibernation_snapshot(int platform_mode)
 
 	msg = in_suspend ? (error ? PMSG_RECOVER : PMSG_THAW) : PMSG_RESTORE;
 	dpm_resume(msg);
-
-	if (error || !in_suspend)
-		pm_restore_gfp_mask();
+	pm_restore_gfp_mask();
 
 	console_resume_all();
 	dpm_complete(msg);
@@ -828,7 +827,6 @@ int hibernate(void)
 				power_down();
 		}
 		in_suspend = 0;
-		pm_restore_gfp_mask();
 	} else {
 		pm_pr_dbg("Hibernation image restored successfully.\n");
 	}
