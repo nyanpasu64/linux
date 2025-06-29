@@ -11,6 +11,7 @@
 #include <linux/reboot.h>
 #include <linux/sysrq.h>
 #include <linux/stop_machine.h>
+#include <linux/suspend.h>
 #include <linux/freezer.h>
 #include <linux/syscore_ops.h>
 #include <linux/export.h>
@@ -159,6 +160,7 @@ out_resume:
 	dpm_resume_end(si.cancelled ? PMSG_THAW : PMSG_RESTORE);
 
 out_thaw:
+	pm_restore_gfp_mask();
 	thaw_processes();
 out:
 	shutting_down = SHUTDOWN_INVALID;
